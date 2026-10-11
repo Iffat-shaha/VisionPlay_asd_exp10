@@ -25,7 +25,7 @@ pipeline {
 
     post {
         success {
-            echo 'VisionPlay CI pipeline completed successfully.'
+            echo 'VisionPlay CI pipeline completed successfully - polling test.'
         }
         failure {
             echo 'VisionPlay CI pipeline failed. Check the console output.'
