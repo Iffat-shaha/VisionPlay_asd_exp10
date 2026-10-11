@@ -33,16 +33,6 @@ pipeline {
                 bat 'python -m pytest -v'
             }
         }
-
-        
-        stage('Docker Connection Check') {
-            steps {
-                bat 'docker --version'
-                bat 'docker info'
-            }
-        }
-
-
     }
 
     post {
