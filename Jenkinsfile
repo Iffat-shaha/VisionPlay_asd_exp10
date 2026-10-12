@@ -34,6 +34,8 @@ pipeline {
             }
         }
     }
+
+    
         stage('Docker Connection and Image Check') {
             steps {
                 bat 'docker --version'
