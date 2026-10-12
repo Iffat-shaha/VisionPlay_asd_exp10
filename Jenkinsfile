@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -20,7 +21,6 @@ pipeline {
             }
         }
 
-        // ADD THE BUILD STAGE HERE
         stage('Build VisionPlay Docker Image') {
             steps {
                 script {
@@ -31,6 +31,39 @@ pipeline {
                     }
                 }
             }
+        }
+
+        stage('Run VisionPlay Tests') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'docker run --rm --entrypoint python visionplay:latest -m pytest -q'
+                    } else {
+                        bat 'docker run --rm --entrypoint python visionplay:latest -m pytest -q'
+                    }
+                }
+            }
+        }
+
+        stage('Verify Docker Image') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'docker images visionplay'
+                    } else {
+                        bat 'docker images visionplay'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'VisionPlay CI pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check Console Output.'
         }
     }
 }
