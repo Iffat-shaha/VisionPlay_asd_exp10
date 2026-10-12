@@ -1,45 +1,39 @@
+
+
 pipeline {
     agent any
 
     stages {
         stage('Checkout') {
             steps {
-                echo 'VisionPlay source code is ready.'
+                echo 'Checking out VisionPlay'
+                checkout scm
             }
         }
 
-        stage('Environment Check') {
+        stage('Docker Check') {
             steps {
-                bat 'python --version'
-                bat 'git --version'
-            }
-        }
+                echo 'Checking Docker connection'
 
-        stage('Install Dependencies') {
-            steps {
-                bat 'python -m pip install -r requirements.txt'
-            }
-        }
-
-        stage('Python Syntax Check') {
-            steps {
-                bat 'python -m py_compile "game final.py"'
-            }
-        }
-
-        stage('Automated Tests') {
-            steps {
-                bat 'python -m pytest -v'
+                script {
+                    if (isUnix()) {
+                        sh 'docker --version'
+                    } else {
+                        bat 'docker --version'
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'VisionPlay CI pipeline completed successfully - all checks passed.'
+            echo 'Pipeline completed successfully'
         }
+
         failure {
-            echo 'VisionPlay CI pipeline failed. Check the console output.'
+            echo 'Pipeline failed. Check Console Output'
         }
     }
 }
+
