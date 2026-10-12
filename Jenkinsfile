@@ -41,7 +41,7 @@ pipeline {
         bat 'docker pull shravanip20/visionplay:latest'
         bat 'docker image inspect shravanip20/visionplay:latest'
     }
-}
+    }
 
     post {
         success {
