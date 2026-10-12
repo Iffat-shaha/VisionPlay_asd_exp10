@@ -34,6 +34,14 @@ pipeline {
             }
         }
     }
+    stage('Docker Connection and Image Check') {
+    steps {
+        bat 'docker --version'
+        bat 'docker info'
+        bat 'docker pull shravanip20/visionplay:latest'
+        bat 'docker image inspect shravanip20/visionplay:latest'
+    }
+}
 
     post {
         success {
