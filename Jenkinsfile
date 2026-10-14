@@ -1,69 +1,30 @@
 
-pipeline {
-    agent any
-
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
+        stage('Test AWS EC2 SSH Connection') {
+            environment {
+                EC2_HOST = '13.203.205.80'
             }
-        }
-
-        stage('Docker Check') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh 'docker --version'
-                    } else {
-                        bat 'docker --version'
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'ec2-ssh-key',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
+                    script {
+                        if (isUnix()) {
+                            sh '''
+                                ssh -o StrictHostKeyChecking=accept-new \
+                                    -i "$SSH_KEY" \
+                                    "$SSH_USER@$EC2_HOST" \
+                                    "echo VisionPlay-EC2-SSH-SUCCESS"
+                            '''
+                        } else {
+                            bat '''
+                                ssh -o StrictHostKeyChecking=accept-new -i "%SSH_KEY%" %SSH_USER%@%EC2_HOST% "echo VisionPlay-EC2-SSH-SUCCESS"
+                            '''
+                        }
                     }
                 }
             }
         }
-
-        stage('Build VisionPlay Docker Image') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh 'docker build -t visionplay:latest .'
-                    } else {
-                        bat 'docker build -t visionplay:latest .'
-                    }
-                }
-            }
-        }
-
-        stage('Run VisionPlay Tests') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh 'docker run --rm --entrypoint python visionplay:latest -m pytest -q'
-                    } else {
-                        bat 'docker run --rm --entrypoint python visionplay:latest -m pytest -q'
-                    }
-                }
-            }
-        }
-
-        stage('Verify Docker Image') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh 'docker images visionplay'
-                    } else {
-                        bat 'docker images visionplay'
-                    }
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'VisionPlay CI pipeline completed successfully!!!!'
-        }
-        failure {
-            echo 'Pipeline failed. Check Console Output.'
-        }
-    }
-}
